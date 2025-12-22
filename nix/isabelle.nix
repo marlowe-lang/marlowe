@@ -1,7 +1,6 @@
 { repoRoot, inputs, pkgs, lib, system }:
 
 let
-
   latex-environment = pkgs.texlive.combine {
     inherit (pkgs.texlive)
       scheme-basic
@@ -15,7 +14,8 @@ let
   };
 
 
-  isabelle-pkgs = inputs.isabelle-nixpkgs.legacyPackages;
+  # isabelle-pkgs = inputs.isabelle-nixpkgs.legacyPackages.${system};
+  isabelle-pkgs = inputs.nixpkgs.legacyPackages.${system};
 
 
   isabelle-test = pkgs.stdenv.mkDerivation {
