@@ -38,7 +38,7 @@ An earlier version of Marlowe is described in a [paper](https://iohk.io/research
 
 ## Developer environment
 
-This repository uses `nix` and `nix-flakes` to provide a reproducible developer environment to all users. Follow the instructions to [install](https://nixos.org/download.html) the nix package manager on your OS and then [use nix to install nix-flakes](https://nixos.wiki/wiki/Flakes#Installing_flakes).
+This repository uses `nix` and `nix-flakes` to provide a reproducible developer environment to all users. Follow the instructions to [install](https://nixos.org/download.html) the nix package manager on your OS and then [use nix to install nix-flakes](https://wiki.nixos.org/wiki/Flakes#Installing_flakes).
 
 Once both tools are installed, download the repository and get in the development environment using
 
