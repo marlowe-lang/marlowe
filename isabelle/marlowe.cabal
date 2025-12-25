@@ -21,8 +21,8 @@ library
         base >=4.16.4.0,
         aeson >= 2 && < 3,
         aeson-pretty >= 0.8.9 && < 0.9,
-        bytestring >= 0.10.12 && < 0.12,
-        text >= 1.2.4,
+        bytestring >= 0.10.12 && < 0.13,
+        text >= 2.1.1,
         scientific >= 0.3.7 && < 0.4,
     other-modules:
         HOL

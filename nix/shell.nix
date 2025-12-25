@@ -1,53 +1,110 @@
-{ repoRoot, inputs, pkgs, lib, system }:
+{ project, repoRoot, inputs, pkgs, lib, system }:
+  let
+    name = "marlowe";
+    welcomeMessage = ''
+      Welcome to Marlowe!
 
-_cabalProject:
+      Tests:
+        • run-isabelle-test
+        • cabal test all
 
-{
-  name = "marlowe";
+      Scripts:
+        • build-marlowe-proofs
+        • edit-marlowe-proofs
+        • build-marlowe-docs
+        • generate-marlowe-language-specification
 
-  welcomeMessage = ''
-    Welcome to Marlowe!
+      Tools:
+        • bnfc
+        • isabelle
+        • latex
+        • lhs2tex
+        • nettools
+        • nil
+        • perl
+    '';
 
-    Tests:
-      • run-isabelle-test
-      • cabal test all
+    tools = {
+      cabal = (project.tool "cabal" "latest");
+      cabal-fmt = (project.tool "cabal-fmt" "latest");
+      haskell-language-server = (project.tool "haskell-language-server" "latest");
+      stylish-haskell = (project.tool "stylish-haskell" "latest");
+      fourmolu = (project.tool "fourmolu" "latest");
+      hlint = (project.tool "hlint" "latest");
+    };
 
-    Scripts:
-      • build-marlowe-proofs
-      • edit-marlowe-proofs
-      • build-marlowe-docs
-      • generate-marlowe-language-specification
+    preCommitCheck = inputs.pre-commit-hooks.lib.${pkgs.system}.run {
+      src = lib.cleanSources ../.;
 
-    Tools:
-      • bnfc
-      • isabelle
-      • latex
-      • lhs2tex
-      • nettools
-      • nil
-      • perl
-  '';
+      hooks = {
+        nixpkgs-fmt = {
+          enable = false;
+          package = pkgs.nixpkgs-fmt;
+        };
+        cabal-fmt = {
+          enable = false;
+          package = tools.cabal-fmt;
+        };
+        stylish-haskell = {
+          enable = false;
+          package = tools.stylish-haskell;
+          args = [ "--config" ".stylish-haskell.yaml" ];
+        };
+        fourmolu = {
+          enable = false;
+          package = tools.fourmolu;
+        };
+        hlint = {
+          enable = false;
+          package = tools.hlint;
+          args = [ "--hint" ".hlint.yaml" ];
+        };
+        shellcheck = {
+          enable = false;
+          package = pkgs.shellcheck;
+        };
+      };
+    };
 
-  packages = [
-    repoRoot.nix.isabelle.isabelle
-    repoRoot.nix.isabelle.latex-environment
-    repoRoot.nix.isabelle.perl
-    repoRoot.nix.isabelle.nettools
+    isabelle = import ./isabelle.nix {
+      inherit repoRoot inputs pkgs lib system;
+    };
 
-    repoRoot.nix.scripts.run-isabelle-test
-    repoRoot.nix.scripts.build-marlowe-proofs
-    repoRoot.nix.scripts.edit-marlowe-proofs
-    repoRoot.nix.scripts.build-marlowe-docs
-    repoRoot.nix.scripts.generate-marlowe-language-specification
+    scripts = import ./scripts.nix {
+      inherit repoRoot inputs pkgs lib system;
+    };
 
-    pkgs.haskellPackages.lhs2tex
-    pkgs.haskellPackages.BNFC
+    shell = project.shellFor {
+      buildInputs = [
+        isabelle.isabelle
+        isabelle.latex-environment
+        isabelle.perl
+        isabelle.nettools
 
-    pkgs.nil
-    pkgs.tk
-  ];
+        scripts.run-isabelle-test
+        scripts.build-marlowe-proofs
+        scripts.edit-marlowe-proofs
+        scripts.build-marlowe-docs
+        scripts.generate-marlowe-language-specification
 
-  preCommit = {
-    nixpkgs-fmt.enable = true;
-  };
-}
+        tools.haskell-language-server
+        tools.haskell-language-server.package.components.exes.haskell-language-server-wrapper
+        tools.stylish-haskell
+        tools.fourmolu
+        tools.cabal
+        tools.hlint
+        tools.cabal-fmt
+
+        pkgs.nil
+        pkgs.tk
+      ];
+
+      shellHook = ''
+        ${preCommitCheck.shellHook}
+      '';
+
+      withHoogle = false;
+    };
+  in
+    shell
+
