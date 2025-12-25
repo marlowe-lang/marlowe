@@ -67,6 +67,17 @@ session CodeExports in "CodeExports" = HOL +
     CodeExports
   export_files (in "../generated") [3] "*:code/**"
 
+session Merkle in "Merkle" = HOL +
+  description "Alternative version of Marlowe with Merkleization"
+  options [document = false, system_heaps = false]
+  sessions
+    "HOL-Library"
+    "Core"
+  theories
+    MerkleTypes
+    MerkleInterpreter
+    Unmerkleize
+
 chapter Doc
 
 session Cheatsheet in "Doc/Cheatsheet" = HOL +
