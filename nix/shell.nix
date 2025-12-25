@@ -1,4 +1,4 @@
-{ project, repoRoot, inputs, pkgs, lib, system }:
+{ project, repoRoot, inputs, pkgs, lib, system, ghcVersion ? "ghc984" }:
   let
     name = "marlowe";
     welcomeMessage = ''
@@ -24,6 +24,19 @@
         • perl
     '';
 
+    lhs2tex = (pkgs.haskell-nix.hackage-package {
+      compiler-nix-name = ghcVersion;
+      name = "lhs2tex";
+      version = "latest";
+    });
+    BNFC = (pkgs.haskell-nix.hackage-package {
+      compiler-nix-name = ghcVersion;
+      name = "BNFC";
+      version = "latest";
+    });
+
+    # This could be probably moved to `shellFor { tools = { cabal = "latest",.. }}` but
+    # then the hooks setup should be modified as well. Not sure how to do that cleanly.
     tools = {
       cabal = (project.tool "cabal" "latest");
       cabal-fmt = (project.tool "cabal-fmt" "latest");
@@ -31,6 +44,8 @@
       stylish-haskell = (project.tool "stylish-haskell" "latest");
       fourmolu = (project.tool "fourmolu" "latest");
       hlint = (project.tool "hlint" "latest");
+      lhs2tex = lhs2tex.components.exes.lhs2TeX;
+      BNFC = BNFC.components.exes.bnfc;
     };
 
     preCommitCheck = inputs.pre-commit-hooks.lib.${pkgs.system}.run {
@@ -94,10 +109,13 @@
         tools.cabal
         tools.hlint
         tools.cabal-fmt
+        tools.lhs2tex
+        tools.BNFC
 
         pkgs.nil
         pkgs.tk
       ];
+
 
       shellHook = ''
         ${preCommitCheck.shellHook}
